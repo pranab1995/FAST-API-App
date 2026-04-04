@@ -17,13 +17,17 @@
 #   - due_date is nullable — tasks may not always have a deadline.
 # =============================================================================
 
-from datetime import date, datetime, timezone
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime, timezone
 
 from sqlalchemy import (
-    Boolean, Column, Date, DateTime, ForeignKey,
+    Boolean, Date, DateTime, ForeignKey,
     Integer, String, Text,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 from app.db.base import Base
 
@@ -40,43 +44,39 @@ class Task(Base):
     # ------------------------------------------------------------------
     # Primary key
     # ------------------------------------------------------------------
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     # ------------------------------------------------------------------
     # Content
     # ------------------------------------------------------------------
-    title = Column(String(255), nullable=False, index=True)
-    description = Column(Text, nullable=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # ------------------------------------------------------------------
     # Status & Priority
     # ------------------------------------------------------------------
-    # Store as strings; the service layer validates against allowed values.
-    # Possible values: "todo" | "in_progress" | "done"
-    status = Column(String(50), default="todo", nullable=False, index=True)
-
-    # Possible values: "low" | "medium" | "high"
-    priority = Column(String(50), default="medium", nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(50), default="todo", nullable=False, index=True)
+    priority: Mapped[str] = mapped_column(String(50), default="medium", nullable=False, index=True)
 
     # ------------------------------------------------------------------
-    # Soft-delete flag (allows "archive" UX without losing data)
+    # Soft-delete flag
     # ------------------------------------------------------------------
-    is_completed = Column(Boolean, default=False, nullable=False)
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # ------------------------------------------------------------------
     # Deadline
     # ------------------------------------------------------------------
-    due_date = Column(Date, nullable=True)
+    due_date: Mapped[Optional[datetime]] = mapped_column(Date, nullable=True)  # type: ignore[assignment]
 
     # ------------------------------------------------------------------
     # Audit timestamps
     # ------------------------------------------------------------------
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
@@ -86,17 +86,11 @@ class Task(Base):
     # ------------------------------------------------------------------
     # Foreign key — ownership
     # ------------------------------------------------------------------
-    # ForeignKey creates a DB-level constraint: owner_id MUST reference
-    # a valid user id. The DB will reject orphaned tasks automatically.
-    #
-    # DRF EQUIVALENT:
-    #   owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
-    # ------------------------------------------------------------------
-    owner_id = Column(
+    owner_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,  # Index for fast "fetch tasks by user" queries
+        index=True,
     )
 
     # ------------------------------------------------------------------
@@ -105,7 +99,7 @@ class Task(Base):
     # back_populates="tasks" must match the attribute name on the User model.
     # This allows: task.owner → User object (no extra query if loaded)
     # ------------------------------------------------------------------
-    owner = relationship("User", back_populates="tasks")
+    owner: Mapped["User"] = relationship("User", back_populates="tasks")
 
     def __repr__(self) -> str:
         return f"<Task id={self.id} title={self.title!r} owner_id={self.owner_id}>"

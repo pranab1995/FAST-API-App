@@ -72,7 +72,7 @@ def get_settings() -> Settings:
         settings = get_settings()
         print(settings.SECRET_KEY)
     """
-    return Settings()
+    return Settings()  # type: ignore[call-arg]
 
 
 # Convenience alias — most modules just do `from app.core.config import settings`

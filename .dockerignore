@@ -1,0 +1,38 @@
+# =============================================================================
+# Docker Ignore - Files NOT to include in the image
+# =============================================================================
+
+# Python artifacts
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Local Environment / Secrets
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Database
+postgres_data/
+
+# IDEs
+.vscode/
+.idea/
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+dockerfile
+README.md
+implementation_plan.md
+task.md
+walkthrough.md
