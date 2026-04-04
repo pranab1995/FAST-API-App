@@ -1,0 +1,7 @@
+# alembic/versions/README
+# Migration scripts are auto-generated here by:
+#   alembic revision --autogenerate -m "description"
+#
+# Each file contains upgrade() and downgrade() functions.
+# Apply:   alembic upgrade head
+# Rollback: alembic downgrade -1
