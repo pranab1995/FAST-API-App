@@ -47,6 +47,5 @@ class Base(DeclarativeBase):
 #   Here we must be explicit — a small trade-off for no magic.
 # ---------------------------------------------------------------------------
 
-# These imports are not "unused" — they populate Base.metadata
-from app.models.user import User        # noqa: F401
-from app.models.task import Task        # noqa: F401
+# Models are no longer imported here to avoid circular dependencies.
+# They should be imported in alembic/env.py or the main application entry point.

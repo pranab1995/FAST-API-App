@@ -22,10 +22,14 @@
 #   SQLAlchemy's relationship() + back_populates creates the bidirectional link.
 # =============================================================================
 
+from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from app.models.task import Task
 
 from app.db.base import Base
 
@@ -41,51 +45,45 @@ class User(Base):
     # ------------------------------------------------------------------
     # Primary key
     # ------------------------------------------------------------------
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     # ------------------------------------------------------------------
     # Identity fields
     # ------------------------------------------------------------------
-    email = Column(
+    email: Mapped[str] = mapped_column(
         String(255),
         unique=True,     # No two users share an email
         index=True,      # B-tree index for fast lookup during login
         nullable=False,
     )
-    full_name = Column(String(255), nullable=False)
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # ------------------------------------------------------------------
     # Security
     # ------------------------------------------------------------------
-    hashed_password = Column(
+    hashed_password: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
-        # NOTE: We store the HASH, never the plain password.
-        # The hash includes the bcrypt salt, so it's safe to store as-is.
     )
 
     # ------------------------------------------------------------------
     # Account status
     # ------------------------------------------------------------------
-    is_active = Column(
+    is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
-        # Soft-delete pattern: deactivate instead of delete,
-        # preserving referential integrity with tasks.
     )
 
     # ------------------------------------------------------------------
     # Audit timestamps
-    # SQL server-side default: the DB sets these, not Python — avoids
-    # clock skew between app servers.
     # ------------------------------------------------------------------
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
@@ -107,11 +105,11 @@ class User(Base):
     #   This is like Django's ForeignKey with related_name="tasks".
     #   task_set (Django's default) becomes tasks here via back_populates.
     # ------------------------------------------------------------------
-    tasks = relationship(
+    tasks: Mapped[list["Task"]] = relationship(  # type: ignore[name-defined]
         "Task",
         back_populates="owner",
         cascade="all, delete-orphan",
-        lazy="select",  # Tasks loaded only when accessed (not eager loaded)
+        lazy="select",
     )
 
     def __repr__(self) -> str:

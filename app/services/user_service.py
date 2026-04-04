@@ -172,8 +172,14 @@ class UserService:
                 detail="Invalid or expired refresh token",
             )
 
-        email = payload.get("sub")
-        user = UserRepository.get_by_email(db, email)
+        sub = payload.get("sub")
+        if not sub or not isinstance(sub, str):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token",
+            )
+        
+        user = UserRepository.get_by_email(db, sub)
         if not user or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

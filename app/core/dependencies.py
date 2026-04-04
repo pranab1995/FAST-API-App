@@ -144,9 +144,10 @@ def get_current_user(
     if payload.get("type") != "access":
         raise credentials_exception
 
-    email: str = payload.get("sub")
-    if email is None:
+    sub = payload.get("sub")
+    if sub is None:
         raise credentials_exception
+    email: str = sub
 
     # Fetch the user from DB — confirms the user still exists
     user = db.query(User).filter(User.email == email).first()

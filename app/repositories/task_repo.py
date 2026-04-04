@@ -25,7 +25,6 @@
 #       .filter(Task.owner_id == user_id)
 # =============================================================================
 
-import math
 from typing import List, Optional, Tuple
 
 from sqlalchemy import or_

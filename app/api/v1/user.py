@@ -41,7 +41,7 @@
 #     urlpatterns = [path('api/v1/users/', include('users.urls'))]
 # =============================================================================
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_active_user, get_db
